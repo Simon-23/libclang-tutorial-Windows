@@ -34,7 +34,7 @@ jobs:
 
       - name: Configure LLVM environment
         run: |
-           # Check if llvm-config is found
+          # Check if llvm-config is found
           $llvmPath = where llvm-config
           if (-not $llvmPath) {
             throw "llvm-config not found. Ensure LLVM is installed and added to the PATH."
