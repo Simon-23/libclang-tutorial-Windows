@@ -1,0 +1,88 @@
+# This is a basic workflow to help you get started with Actions
+
+name: LibClang tutorial
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a set of commands using the runners shell
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl file git coreutils
+
+      - name: Debug Check installed tools
+        run: |
+          echo "Check coreutils installation:"
+          which dirname
+          which readlink
+          echo "Current PATH:"
+          echo $PATH
+
+      - name: Set up Homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo "HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew" >> $GITHUB_ENV
+          echo "PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH" >> $GITHUB_ENV
+
+      - name: Verify Homebrew Installation
+        run: |
+          source $GITHUB_ENV
+          echo "Homebrew Path:"
+          which brew
+          brew --version
+          brew update
+
+      - name: Install LLVM
+        run: |
+          source $GITHUB_ENV
+          /home/linuxbrew/.linuxbrew/bin/brew install llvm@15
+          LLVM_PREFIX=$(/home/linuxbrew/.linuxbrew/bin/brew --prefix llvm@15)
+          echo "LLVM_PREFIX=$LLVM_PREFIX" >> $GITHUB_ENV
+          echo "PATH=$LLVM_PREFIX/bin:$PATH" >> $GITHUB_ENV
+          echo "LDFLAGS=-L$LLVM_PREFIX/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I$LLVM_PREFIX/include" >> $GITHUB_ENV
+
+      - name: Verify LLVM Installation
+        run: |
+          source $GITHUB_ENV
+          llvm-config --version
+
+      - name: Configure Project
+        run: |
+          source $GITHUB_ENV
+          cmake .
+
+      - name: Build Project
+        run: |
+          source $GITHUB_ENV
+          make VERBOSE=1
+
+      - name: List All Files in Repository
+        run: |
+          find $GITHUB_WORKSPACE -type f -exec ls -lh {} \;
+
+      # Upload the hello-world binary as an artifact
+      - name: Upload hello-world binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello-world-binary
+          path: ${{ github.workspace }}/bin/hello-world # path to the binary
