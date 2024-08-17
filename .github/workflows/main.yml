@@ -34,8 +34,11 @@ jobs:
 
       - name: Configure LLVM environment
         run: |
-          # Assuming LLVM is already installed and added to PATH
-          $llvmPath = (where llvm-config).split("\n")[0]
+           # Check if llvm-config is found
+          $llvmPath = where llvm-config
+          if (-not $llvmPath) {
+            throw "llvm-config not found. Ensure LLVM is installed and added to the PATH."
+          }
           $llvmDir = [System.IO.Path]::GetDirectoryName($llvmPath)
           echo "LLVM Directory: $llvmDir"
           echo "LLVM_PREFIX=$llvmDir" >> $env:GITHUB_ENV
