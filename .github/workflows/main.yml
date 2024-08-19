@@ -37,19 +37,6 @@ jobs:
           # Append LLVM installation path to the PATH
           echo "PATH=$llvmInstallPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Debug Check installed tools
-        run: |
-          echo "Check if LLVM is installed"
-          where clang
-          where llvm-config
-          echo "Current PATH:"
-          echo $env:Path
-
-      - name: Verify LLVM Installation
-        run: |
-          $llvmPath = (where llvm-config).split("\n")[0]
-          & $llvmPath --version
-
       - name: Configure Project
         run: |
           cmake .
