@@ -26,7 +26,7 @@ jobs:
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v2.0.4
         with:
-          llvm-version: '15'  # Specify the version of LLVM you want to install
+          version: '15'  # Specify the version of LLVM you want to install
           components: 'clang lld llvm-config'  # Ensure you install clang and llvm-config  # Ensure you install clang and llvm-config
 
       
