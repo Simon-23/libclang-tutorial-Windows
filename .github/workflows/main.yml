@@ -27,9 +27,15 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2.0.4
         with:
           version: '15'  # Specify the version of LLVM you want to install
-         
       
-      # Runs a set of commands using the runner's shell
+      # Add LLVM to the PATH
+      - name: Add LLVM to PATH
+        run: |
+          $llvmInstallPath = Get-Command clang | Select-Object -ExpandProperty Source | Split-Path
+          echo "LLVM installed at: $llvmInstallPath"
+          
+          # Append LLVM installation path to the PATH
+          echo "PATH=$llvmInstallPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Debug Check installed tools
         run: |
