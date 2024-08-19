@@ -37,6 +37,36 @@ jobs:
           # Append LLVM installation path to the PATH
           echo "PATH=$llvmInstallPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+       # Debug Check installed tools
+      - name: Debug Check installed tools
+        run: |
+          echo "Check if LLVM is installed"
+          where clang
+          where llvm-config
+          echo "Current PATH:"
+          echo $env:Path
+
+      - name: Configure LLVM environment
+        run: |
+          # Check if llvm-config is found
+          $llvmPath = where llvm-config
+          if (-not $llvmPath) {
+            throw "llvm-config not found. Ensure LLVM is installed and added to the PATH."
+          }
+          $llvmDir = [System.IO.Path]::GetDirectoryName($llvmPath)
+          echo "LLVM Directory: $llvmDir"
+          
+          # Set environment variables for GitHub Actions in PowerShell
+          echo "LLVM_PREFIX=$llvmDir" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "PATH=$llvmDir;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "LDFLAGS=-L$llvmDir\lib" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "CPPFLAGS=-I$llvmDir\include" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Verify LLVM Installation
+        run: |
+          $llvmPath = (where llvm-config).split("\n")[0]
+          & $llvmPath --version
+
       - name: Configure Project
         run: |
           cmake .
