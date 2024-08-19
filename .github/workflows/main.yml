@@ -45,20 +45,6 @@ jobs:
           echo "Current PATH:"
           echo $env:Path
 
-      - name: Configure LLVM environment
-        run: |
-          # Check if llvm-config is found
-          $llvmPath = where llvm-config
-          if (-not $llvmPath) {
-            throw "llvm-config not found. Ensure LLVM is installed and added to the PATH."
-          }
-          $llvmDir = [System.IO.Path]::GetDirectoryName($llvmPath)
-          echo "LLVM Directory: $llvmDir"
-          echo "LLVM_PREFIX=$llvmDir" >> $env:GITHUB_ENV
-          echo "PATH=$llvmDir;$env:Path" >> $env:GITHUB_ENV
-          echo "LDFLAGS=-L$llvmDir\lib" >> $env:GITHUB_ENV
-          echo "CPPFLAGS=-I$llvmDir\include" >> $env:GITHUB_ENV
-
       - name: Verify LLVM Installation
         run: |
           $llvmPath = (where llvm-config).split("\n")[0]
