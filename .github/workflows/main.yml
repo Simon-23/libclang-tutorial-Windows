@@ -53,6 +53,13 @@ jobs:
           where llvm-config
           echo "Current PATH:"
           echo $env:Path
+          # Verify llvm-config exists in the expected location
+          if (Test-Path "$llvmInstallPath\llvm-config.exe") {
+            echo "llvm-config found at: $llvmInstallPath\llvm-config.exe"
+          } else {
+            echo "llvm-config not found!"
+            exit 1
+          }
 
       # Configure Project
       - name: Configure Project
