@@ -57,18 +57,21 @@ jobs:
       # Configure Project
       - name: Configure Project
         run: |
-          source $GITHUB_ENV
-          cmake -DLLVM_CONFIG_EXECUTABLE=$LLVM_CONFIG_EXECUTABLE .
+          # Load the environment variables from $GITHUB_ENV
+          Get-Content $env:GITHUB_ENV | ForEach-Object { 
+            if ($_ -match "([^=]+)=(.+)") { 
+              [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2]) 
+            } 
+          }
+          cmake -DLLVM_CONFIG_EXECUTABLE=$env:LLVM_CONFIG_EXECUTABLE .
 
       # Build Project
       - name: Build Project
-        run: |
-          mingw32-make VERBOSE=1
+        run: mingw32-make VERBOSE=1
 
       # List All Files in Repository
       - name: List All Files in Repository
-        run: |
-          Get-ChildItem -Recurse $GITHUB_WORKSPACE | ForEach-Object { Write-Host $_.FullName }
+        run: Get-ChildItem -Recurse $GITHUB_WORKSPACE | ForEach-Object { Write-Host $_.FullName }
 
       # Upload the hello-world binary as an artifact
       - name: Upload hello-world binary
