@@ -24,7 +24,12 @@ jobs:
 
       # Install Scoop
       - name: Install Scoop
-        run: iex (new-object net.webclient).downloadstring('https://get.scoop.sh')
+        run: |
+          iex (new-object net.webclient).downloadstring('https://get.scoop.sh')
+          # Add Scoop to PATH for the current session
+          $scoopPath = [Environment]::GetEnvironmentVariable('USERPROFILE') + '\scoop\shims'
+          echo "Scoop installed at: $scoopPath"
+          echo "PATH=$scoopPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       # Install LLVM and Ninja globally using Scoop
       - name: Install LLVM and Ninja
@@ -48,15 +53,17 @@ jobs:
           echo "Current PATH:"
           echo $env:Path
 
-
+      # Configure Project
       - name: Configure Project
         run: |
           cmake .
 
+      # Build Project
       - name: Build Project
         run: |
           mingw32-make VERBOSE=1
 
+      # List All Files in Repository
       - name: List All Files in Repository
         run: |
           Get-ChildItem -Recurse $GITHUB_WORKSPACE | ForEach-Object { Write-Host $_.FullName }
