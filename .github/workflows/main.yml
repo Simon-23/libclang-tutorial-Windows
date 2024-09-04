@@ -42,8 +42,8 @@ jobs:
           echo "LLVM installed at: $llvmInstallPath"
           
           # Append LLVM installation path to the PATH
-          echo "PATH=$llvmInstallPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
           echo "LLVM_CONFIG_EXECUTABLE=$llvmInstallPath\llvm-config.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "PATH=$llvmInstallPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       # Debug Check installed tools
       - name: Debug Check installed tools
