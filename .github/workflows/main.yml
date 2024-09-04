@@ -22,16 +22,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Use the "Install LLVM and Clang" action
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v2.0.4
-        with:
-          version: '15'  # Specify the version of LLVM you want to install
-      
+      # Install Scoop
+      - name: Install Scoop
+        run: iex (new-object net.webclient).downloadstring('https://get.scoop.sh')
+
+      # Install LLVM and Ninja globally using Scoop
+      - name: Install LLVM and Ninja
+        run: scoop install ninja llvm --global
+
       # Add LLVM to the PATH
       - name: Add LLVM to PATH
         run: |
-          $llvmInstallPath = Get-Command clang | Select-Object -ExpandProperty Source | Split-Path
+          $llvmInstallPath = (scoop prefix llvm) + "\bin"
           echo "LLVM installed at: $llvmInstallPath"
           
           # Append LLVM installation path to the PATH
@@ -46,26 +48,6 @@ jobs:
           echo "Current PATH:"
           echo $env:Path
 
-      - name: Configure LLVM environment
-        run: |
-          # Check if llvm-config is found
-          $llvmPath = where llvm-config
-          if (-not $llvmPath) {
-            throw "llvm-config not found. Ensure LLVM is installed and added to the PATH."
-          }
-          $llvmDir = [System.IO.Path]::GetDirectoryName($llvmPath)
-          echo "LLVM Directory: $llvmDir"
-          
-          # Set environment variables for GitHub Actions in PowerShell
-          echo "LLVM_PREFIX=$llvmDir" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "PATH=$llvmDir;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "LDFLAGS=-L$llvmDir\lib" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "CPPFLAGS=-I$llvmDir\include" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Verify LLVM Installation
-        run: |
-          $llvmPath = (where llvm-config).split("\n")[0]
-          & $llvmPath --version
 
       - name: Configure Project
         run: |
