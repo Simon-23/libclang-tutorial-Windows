@@ -2,31 +2,23 @@
 
 name: LibClang tutorial
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the main branch
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # Run on Windows instead of Ubuntu
     runs-on: windows-latest
     
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       # Install Scoop
       - name: Install Scoop
         run: |
           iex (new-object net.webclient).downloadstring('https://get.scoop.sh')
-          # Add Scoop to PATH for the current session
           $scoopPath = [Environment]::GetEnvironmentVariable('USERPROFILE') + '\scoop\shims'
           echo "Scoop installed at: $scoopPath"
           echo "PATH=$scoopPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -58,6 +50,9 @@ jobs:
             echo "llvm-config found at: $llvmInstallPath\llvm-config.exe"
           } else {
             echo "llvm-config not found!"
+            echo "Checking alternative locations..."
+            # Search for llvm-config in the entire system
+            Get-ChildItem -Path C:\ -Recurse -Include llvm-config.exe -ErrorAction SilentlyContinue
             exit 1
           }
 
@@ -65,13 +60,11 @@ jobs:
       - name: Configure Project
         shell: pwsh
         run: |
-          # Load the environment variables from $GITHUB_ENV
           Get-Content $env:GITHUB_ENV | ForEach-Object { 
             if ($_ -match "([^=]+)=(.+)") { 
               [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2]) 
             } 
           }
-          # Run CMake with the correct LLVM_CONFIG_EXECUTABLE
           cmake -DLLVM_CONFIG_EXECUTABLE=$env:LLVM_CONFIG_EXECUTABLE .
 
       # Build Project
@@ -88,4 +81,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hello-world-binary
-          path: ${{ github.workspace }}\bin\hello-world.exe # path to the binary
+          path: ${{ github.workspace }}\bin\hello-world.exe
