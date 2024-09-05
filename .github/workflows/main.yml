@@ -13,28 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Install LLVM system-wide using GitHub utility
-      - name: Install LLVM
+      # Install LLVM system-wide using GitHub llvm-util
+      - name: Install LLVM system-wide
         run: |
-          # Download LLVM installer
-          $llvmInstallerPath = "$env:GITHUB_WORKSPACE\\LLVM-18.1.0-win64.exe"
-          curl -fsSL -o $llvmInstallerPath "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.0/LLVM-18.1.0-win64.exe"
-          
-          # Ensure the installer is downloaded
-          if (!(Test-Path $llvmInstallerPath)) {
-            echo "Failed to download LLVM installer."
-            exit 1
-          }
+          curl -fsSL -o "LLVM-18.1.0-win64.exe" "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.0/LLVM-18.1.0-win64.exe"
+          ./LLVM-18.1.0-win64.exe /S
 
-          # Run the installer
-          Start-Process -FilePath $llvmInstallerPath -ArgumentList "/S" -Wait -NoNewWindow
-          
-          # Set llvm-config path
-          $llvmConfigPath = "C:\\Program Files\\LLVM\\bin\\llvm-config.exe"
-          if (!(Test-Path $llvmConfigPath)) {
-            echo "llvm-config.exe not found at $llvmConfigPath"
-            exit 1
-          }
+      # Manually set llvm-config path
+      - name: Set llvm-config path
+        run: |
+          $llvmConfigPath = "C:\Program Files\LLVM\bin\llvm-config.exe"
           echo "LLVM_CONFIG_EXECUTABLE=$llvmConfigPath" | Out-File -FilePath $env:GITHUB_ENV -Append
           echo "PATH=$(dirname $llvmConfigPath);$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
