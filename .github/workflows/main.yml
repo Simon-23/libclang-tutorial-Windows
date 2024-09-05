@@ -27,15 +27,12 @@ jobs:
       - name: Install LLVM and Ninja
         run: scoop install ninja llvm --global
 
-      # Add LLVM to the PATH
-      - name: Add LLVM to PATH
+      # Manually set llvm-config path
+      - name: Set llvm-config path
         run: |
-          $llvmInstallPath = (scoop prefix llvm) + "\bin"
-          echo "LLVM installed at: $llvmInstallPath"
-          
-          # Append LLVM installation path to the PATH
-          echo "LLVM_CONFIG_EXECUTABLE=$llvmInstallPath\llvm-config.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "PATH=$llvmInstallPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
+          $llvmConfigPath = "C:\Program Files (x86)\Android\android-sdk\ndk\27.0.12077973\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-config.exe"
+          echo "LLVM_CONFIG_EXECUTABLE=$llvmConfigPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "PATH=$(dirname $llvmConfigPath);$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       # Debug Check installed tools
       - name: Debug Check installed tools
@@ -45,16 +42,6 @@ jobs:
           where llvm-config
           echo "Current PATH:"
           echo $env:Path
-          # Verify llvm-config exists in the expected location
-          if (Test-Path "$llvmInstallPath\llvm-config.exe") {
-            echo "llvm-config found at: $llvmInstallPath\llvm-config.exe"
-          } else {
-            echo "llvm-config not found!"
-            echo "Checking alternative locations..."
-            # Search for llvm-config in the entire system
-            Get-ChildItem -Path C:\ -Recurse -Include llvm-config.exe -ErrorAction SilentlyContinue
-            exit 1
-          }
 
       # Configure Project
       - name: Configure Project
