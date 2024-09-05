@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: LibClang tutorial
 
 on:
@@ -15,22 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Install Scoop
-      - name: Install Scoop
+      # Install LLVM system-wide using GitHub llvm-util
+      - name: Install LLVM system-wide
         run: |
-          iex (new-object net.webclient).downloadstring('https://get.scoop.sh')
-          $scoopPath = [Environment]::GetEnvironmentVariable('USERPROFILE') + '\scoop\shims'
-          echo "Scoop installed at: $scoopPath"
-          echo "PATH=$scoopPath;$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      # Install LLVM and Ninja globally using Scoop
-      - name: Install LLVM and Ninja
-        run: scoop install ninja llvm --global
+          curl -fsSL -o "LLVM-18.1.0-win64.exe" "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.0/LLVM-18.1.0-win64.exe"
+          ./LLVM-18.1.0-win64.exe /S
 
       # Manually set llvm-config path
       - name: Set llvm-config path
         run: |
-          $llvmConfigPath = "C:\Program Files (x86)\Android\android-sdk\ndk\27.0.12077973\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-config.exe"
+          $llvmConfigPath = "C:\Program Files\LLVM\bin\llvm-config.exe"
           echo "LLVM_CONFIG_EXECUTABLE=$llvmConfigPath" | Out-File -FilePath $env:GITHUB_ENV -Append
           echo "PATH=$(dirname $llvmConfigPath);$env:Path" | Out-File -FilePath $env:GITHUB_ENV -Append
 
