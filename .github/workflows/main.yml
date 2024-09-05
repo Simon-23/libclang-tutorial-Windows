@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: LibClang tutorial
 
 on:
@@ -18,9 +16,20 @@ jobs:
       # Install LLVM system-wide using GitHub utility
       - name: Install LLVM
         run: |
-          curl -fsSL -o "LLVM-18.1.0-win64.exe" "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.0/LLVM-18.1.0-win64.exe"
-          LLVM-18.1.0-win64.exe /S
-          # Assuming the default installation path for LLVM
+          # Download LLVM installer
+          $llvmInstallerPath = "$env:GITHUB_WORKSPACE\\LLVM-18.1.0-win64.exe"
+          curl -fsSL -o $llvmInstallerPath "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.0/LLVM-18.1.0-win64.exe"
+          
+          # Ensure the installer is downloaded
+          if (!(Test-Path $llvmInstallerPath)) {
+            echo "Failed to download LLVM installer."
+            exit 1
+          }
+
+          # Run the installer
+          Start-Process -FilePath $llvmInstallerPath -ArgumentList "/S" -Wait -NoNewWindow
+          
+          # Set llvm-config path
           $llvmConfigPath = "C:\\Program Files\\LLVM\\bin\\llvm-config.exe"
           if (!(Test-Path $llvmConfigPath)) {
             echo "llvm-config.exe not found at $llvmConfigPath"
